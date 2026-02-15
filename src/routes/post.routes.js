@@ -13,7 +13,8 @@ postRouter.post('/test', upload.single('Image'), (req, res)=>{
 })
 
 postRouter.post('/', upload.single('Image'), postController.createPostController)
-
+postRouter.get('/', postController.getPostController )
+postRouter.get('/details/:postId', postController.getPostDetailsController)
 
 
 module.exports = postRouter
