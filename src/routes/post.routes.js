@@ -3,18 +3,11 @@ const postController = require('../controllers/post.controllers');
 const postRouter = express.Router();
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
+const identifyUser = require('../middlewares/auth.middleware')
 
-
-postRouter.post('/test', upload.single('Image'), (req, res)=>{
-    console.log(req.body, req.file)
-    res.status(200).json({
-        message: "This is the post test Api."
-    })
-})
-
-postRouter.post('/', upload.single('Image'), postController.createPostController)
-postRouter.get('/', postController.getPostController )
-postRouter.get('/details/:postId', postController.getPostDetailsController)
+postRouter.post('/', upload.single('Image'),identifyUser, postController.createPostController)
+postRouter.get('/', identifyUser, postController.getPostController )
+postRouter.get('/details/:postId', identifyUser, postController.getPostDetailsController)
 
 
 module.exports = postRouter

@@ -1,6 +1,5 @@
 const postModel = require("../models/post.model");
 const ImageKit = require("@imagekit/nodejs");
-const jwt = require("jsonwebtoken");
 const { toFile } = require("@imagekit/nodejs");
 
 const cloud = new ImageKit({
@@ -9,21 +8,6 @@ const cloud = new ImageKit({
 
 async function createPostController(req, res) {
   try {
-    const { caption } = req.body;
-
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    let decoded = null
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-      return res.status(401).json({ message: "Unauthorized" })
-    }
-
-    const userId = decoded.id;
 
     const uploadedFile = await cloud.files.upload({
       file: await toFile(req.file.buffer, "file"),
@@ -32,9 +16,9 @@ async function createPostController(req, res) {
     });
 
     const post = await postModel.create({
-      caption,
+      caption: req.body.caption,
       imgUrl: uploadedFile.url,
-      user: userId
+      user: req.user.id
     });
 
     res.status(201).json({
@@ -48,27 +32,9 @@ async function createPostController(req, res) {
 }
 
 async function getPostController(req, res) {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  let decoded = null;
-
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET)
-  } catch (error) {
-    return res.status(401).json({
-      message: "Token Invalid",
-      error
-    })
-  }
-
-  const userId = decoded.id;
 
   const post = await postModel.find({
-    user: userId
+    user: req.user.id
   })
 
   res.status(200).json({
@@ -79,25 +45,8 @@ async function getPostController(req, res) {
 }
 
 async function getPostDetailsController(req, res) {
-  const token = req.cookies.token;
 
-  if (!token) {
-    return res.status(401).json({
-      message: "Unauthorized Access!"
-    })
-  }
-
-  let decoded = null
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET)
-  } catch (error) {
-    return res.status(401).json({
-      message: "Invalid Token",
-      error: error.message
-    })
-  }
-
-  const userId = decoded.id;
+  const userId = req.user.id;
   const postId = req.params.postId;
 
   const post = await postModel.findById(postId)
