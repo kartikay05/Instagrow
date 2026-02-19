@@ -3,15 +3,15 @@ const authController = require('../controllers/auth.controller')
 
 
 const authRouter = express.Router();
-
-// authRouter.post('/test', (req, res) => {
-//     console.log(req.body)
-//     res.send(req.body)
-// })
-
+ 
+/*
+*POST /api/auth/register
+*/
 authRouter.post('/register', authController.registerController);
 
-
+/*
+*POST /api/auth/login
+*/
 authRouter.post('/login', authController.loginController);
 
 module.exports = authRouter;
