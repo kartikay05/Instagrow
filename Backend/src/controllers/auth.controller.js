@@ -114,4 +114,24 @@ async function loginController(req, res) {
 
 }
 
-module.exports = { registerController, loginController }
+async function getMeController(req, res) {
+    try {
+        const userId = req.user.id
+
+        const user = await userModel.findById(userId)
+
+        res.status(200).json({
+            user: {
+                username: user.username,
+                email: user.email,
+                bio: user.bio,
+                profileImage: user.profileImage
+            }
+        })
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+
+module.exports = { registerController, loginController, getMeController }

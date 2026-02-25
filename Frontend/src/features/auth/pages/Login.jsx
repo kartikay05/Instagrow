@@ -1,23 +1,29 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import "../style/form.scss";
-import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSubmit(e) {
+  const { user, loading, handleLogin } = useAuth();
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    axios.post(
-      "http://localhost:5000/api/auth/login",
-      {
-        username,
-        password,
-      },
-      { withCredentials: true }
-    ).then(res => console.log(res.data))
+    await handleLogin(username, password);
+
+    navigate("/");
+  }
+
+  if (loading) {
+    return <main>
+      <h1>Loading....</h1>
+    </main>
   }
 
   return (
@@ -47,7 +53,7 @@ const Login = () => {
         <p>
           Don't have an account?{" "}
           <Link className="toggleAuthForm" to="/register">
-            Register
+            Create Account
           </Link>
         </p>
       </div>

@@ -9,7 +9,7 @@ async function connectToDb() {
         console.log("Failed to connect to Database", error)
         
         res.status(409).json({
-            message: "Failed to conneced to Databse."
+            message: "Failed to conneced to Database."
         })
     }
 }
