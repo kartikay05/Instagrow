@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import "../style/form.scss";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router";
+import { toast, Toaster } from "react-hot-toast";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -17,19 +18,23 @@ const Login = () => {
 
     await handleLogin(username, password);
 
+    toast.success("res?.data?.message");
     navigate("/");
   }
 
-  if (loading) {
-    return <main>
-      <h1>Loading....</h1>
-    </main>
+  if (loading && !user) {
+    return (
+      <main>
+        <h1>Loading....</h1>
+      </main>
+    );
   }
 
   return (
     <main>
       <div className="form-container">
         <h1>Login</h1>
+        <Toaster position="top-right" />
         <form onSubmit={handleSubmit}>
           <input
             onInput={(e) => setUsername(e.target.value)}

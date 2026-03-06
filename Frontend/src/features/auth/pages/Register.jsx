@@ -15,11 +15,12 @@ const Register = () => {
     e.preventDefault();
 
     await handleRegister(username, email, password);
+    // toast.success("User Register Successfully!")
 
     navigate("/");
   }
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <main>
         <h1>Loading...</h1>
@@ -30,6 +31,7 @@ const Register = () => {
     <main>
       <div className="form-container">
         <h1>Register</h1>
+        
         <form onSubmit={submitHandler}>
           <input
             onInput={(e) => setUsername(e.target.value)}

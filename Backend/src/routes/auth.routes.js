@@ -14,6 +14,11 @@ authRouter.post('/register', authController.registerController);
 */
 authRouter.post('/login', authController.loginController);
 
+/*
+*POST /api/auth/logout
+*/
+authRouter.post('/logout', authController.logoutController);
+
 
 /*
 *GET api/auth/get-me

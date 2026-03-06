@@ -1,5 +1,6 @@
 const postModel = require("../models/post.model");
 const likeModel = require("../models/like.model");
+const followModel = require("../models/follow.model");
 const ImageKit = require("@imagekit/nodejs");
 const { toFile } = require("@imagekit/nodejs");
 
@@ -120,4 +121,52 @@ async function likePostController(req, res) {
 }
 
 
-module.exports = { createPostController, getPostController, getPostDetailsController, likePostController };
+async function getPostFeedController(req, res) {
+  try {
+    const feed = await postModel
+      .find()
+      .sort({ createdAt: -1 })
+      .populate("user")
+      .select("-user.password");
+
+    const currentUsername = req.user.username;
+
+    const enrichedFeed = await Promise.all(
+      feed.map(async (postDoc) => {
+        const post = postDoc.toObject();
+
+        const likeCount = await likeModel.countDocuments({ post: post._id });
+        const isLiked = Boolean(
+          await likeModel.exists({ post: post._id, user: currentUsername })
+        );
+
+        const authorUsername = post.user?.username;
+        const isFollowing =
+          authorUsername && authorUsername !== currentUsername
+            ? Boolean(
+                await followModel.exists({
+                  follower: currentUsername,
+                  followee: authorUsername,
+                })
+              )
+            : false;
+
+        return {
+          ...post,
+          likeCount,
+          isLiked,
+          isFollowing,
+        };
+      })
+    );
+
+    res.status(200).json({
+      message: "feed fetched successfully",
+      feed: enrichedFeed
+    })
+  } catch (error) {
+    res.status(500).json({ message: "Failed to Fetch Post Feed", error: error.message })
+  }
+}
+
+module.exports = { createPostController, getPostController, getPostDetailsController, likePostController, getPostFeedController };

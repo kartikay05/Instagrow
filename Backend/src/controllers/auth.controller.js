@@ -35,7 +35,11 @@ async function registerController(req, res) {
             { expiresIn: "1d" }
         );
 
-        res.cookie("token", token, { httpOnly: true });
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+        });
 
         res.status(201).json({
             message: "User Registered successfully",
@@ -48,14 +52,12 @@ async function registerController(req, res) {
         });
 
     } catch (err) {
-        // ✅ Mongoose validation error
         if (err.name === "ValidationError") {
             return res.status(400).json({
                 error: err.message
             });
         }
 
-        // ✅ Duplicate key error
         if (err.code === 11000) {
             return res.status(409).json({
                 error: "Email or Username already exists"
@@ -78,10 +80,10 @@ async function loginController(req, res) {
                 username: username
             }
         ]
-    })
+    }).select("+password")
 
     if (!user) {
-        res.status(404).json({
+        return res.status(404).json({
             message: "user not found"
         })
     }
@@ -89,7 +91,7 @@ async function loginController(req, res) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-        res.status(401).json({
+        return res.status(401).json({
             message: "Invalid Password"
         })
     }
@@ -100,7 +102,11 @@ async function loginController(req, res) {
         { expiresIn: "1h" }
     )
 
-    res.cookie('token', token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    });
 
     res.status(200).json({
         message: "User LoggedIn Successfully",
@@ -121,12 +127,13 @@ async function getMeController(req, res) {
         const user = await userModel.findById(userId)
 
         res.status(200).json({
+            authenticated: true,
             user: {
                 username: user.username,
                 email: user.email,
                 bio: user.bio,
                 profileImage: user.profileImage
-            }
+            } 
         })
     } catch (err) {
         console.log(err)
@@ -134,4 +141,17 @@ async function getMeController(req, res) {
 
 }
 
-module.exports = { registerController, loginController, getMeController }
+async function logoutController(req, res) {
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.status(200).json({
+        authenticated: false,
+        message: "Logged out",
+    });
+}
+
+module.exports = { registerController, loginController, getMeController, logoutController }

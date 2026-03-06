@@ -1,33 +1,66 @@
 import { useContext } from "react";
 import { AuthContext } from "../auth.context";
-import { login, register, getMe } from '../services/auth.api'
+import { login, register, getMe, logout } from '../services/auth.api'
 
 export const useAuth = () => {
 
     const context = useContext(AuthContext)
 
-    const { user, setUser, loading, setLoading } = context
+    const { user, setUser, loading, setLoading, authenticate, setAuthenticate } = context
 
     const handleLogin = async (username, password) => {
-        setLoading(true)
-
-        const response = await login(username, password)
-        setUser(response.data)
-
-        setLoading(false)
+        setLoading(true);
+        try {
+            const data = await login(username, password);
+            setUser(data?.user ?? null);
+            setAuthenticate(true);
+            return data;
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleRegister = async (username, email, password) => {
-        setLoading(true)
+        setLoading(true);
+        try {
+            const data = await register(username, email, password);
+            setUser(data?.user ?? null);
+            setAuthenticate(true);
+            return data;
+        } finally {
+            setLoading(false);
+        }
+    }
 
-        const response = await register(username, email, password);
-        setUser(response.data)
+    const handleGetAuth = async () => {
+        setLoading(true);
+        try {
+            const data = await getMe();
+            const authed = Boolean(data?.authenticated);
+            setAuthenticate(authed);
+            setUser(authed ? (data.user ?? null) : null);
+            return data;
+        } catch {
+            setAuthenticate(false);
+            setUser(null);
+            return { authenticated: false };
+        } finally {
+            setLoading(false);
+        }
+    }
 
-        setLoading(false)
-
+    const handleLogout = async () => {
+        setLoading(true);
+        try {
+            await logout();
+        } finally {
+            setUser(null);
+            setAuthenticate(false);
+            setLoading(false);
+        }
     }
 
     return {
-        user, loading, handleLogin, handleRegister
+        user, loading, authenticate, handleLogin, handleRegister, handleGetAuth, handleLogout
     }
 }

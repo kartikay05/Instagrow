@@ -1,0 +1,12 @@
+.nav-bar{
+    width: 100%;
+    padding-block: 1rem;
+    padding-inline: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    P{
+        font-size: 2.5rem;
+    }
+}
