@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api/user",
+  baseURL: "https://instagrow-h9rx.onrender.com/api/user",
   withCredentials: true,
 });
 
