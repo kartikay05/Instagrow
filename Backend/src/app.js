@@ -1,6 +1,7 @@
 const express = require("express")
 const cookiePareser = require('cookie-parser')
 const cors = require('cors')
+const path = require('path')
 
 const app = express();
 app.use(cookiePareser())
@@ -9,6 +10,7 @@ app.use(cors({
     origin: "http://localhost:5173"
 }))
 app.use(express.json())
+app.use(express.static('./public'))
 
 
 /* require routes */
